@@ -1,3 +1,4 @@
+
 import { IconLayer, IconFormat } from '../types';
 
 const ICO_SIZES = [256, 128, 64, 48, 32, 16];
@@ -45,6 +46,10 @@ export const generateIconLayers = async (sourceUrl: string, format: IconFormat =
   
   return new Promise((resolve, reject) => {
     const img = new Image();
+    // CRITICAL: Allow cross-origin images to be drawn to canvas without tainting it.
+    // This allows us to process images from external URLs (like Alibaba OSS).
+    img.crossOrigin = 'anonymous'; 
+    
     img.onload = async () => {
       try {
         const layers: IconLayer[] = [];
@@ -61,7 +66,7 @@ export const generateIconLayers = async (sourceUrl: string, format: IconFormat =
         reject(e);
       }
     };
-    img.onerror = (err) => reject(new Error("Failed to load source image"));
+    img.onerror = (err) => reject(new Error("Failed to load source image. If using an external URL, ensure CORS headers are allowed."));
     img.src = sourceUrl;
   });
 };

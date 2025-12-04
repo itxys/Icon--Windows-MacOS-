@@ -1,8 +1,9 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Download, Image as ImageIcon, Sparkles, RefreshCcw, Trash2, Zap, ArrowRight, Layers, Monitor, Apple, Globe, Mail, User } from 'lucide-react';
+import { Upload, Download, Image as ImageIcon, Sparkles, RefreshCcw, Trash2, Zap, ArrowRight, Layers, Monitor, Apple, Globe, Mail, User, Settings, Key, ChevronDown, ChevronUp } from 'lucide-react';
 import { generateIconLayers, createIcoFile, createIcnsFile } from './utils/icoGenerator';
 import { generateIcon } from './services/geminiService';
-import { IconLayer, AppTab, IconFormat } from './types';
+import { IconLayer, AppTab, IconFormat, AIConfig } from './types';
 import { Button } from './components/Button';
 import { Alert } from './components/Alert';
 
@@ -17,7 +18,7 @@ const translations = {
     aiDesc: "Describe the icon you need, and our AI will create a professional, vector-style asset ready for conversion.",
     aiPlaceholder: "e.g., A futuristic blue rocket ship, minimalist flat design...",
     aiButton: "Generate",
-    aiPoweredBy: "Powered by Google Gemini 2.5 Flash Image",
+    aiPoweredBy: "Powered by AI",
     convertTitle: "Convert PNG to Icon",
     convertDesc: "Create multi-size icons for Windows (.ICO) and macOS (.ICNS) effortlessly. Secure, client-side conversion.",
     formatWindows: "Windows",
@@ -39,7 +40,16 @@ const translations = {
     terms: "Terms",
     errorImage: "Please upload a valid image file (PNG, JPG).",
     errorGen: "Failed to generate icon.",
-    layerType: "32-bit PNG"
+    layerType: "32-bit PNG",
+    settingsTitle: "AI Settings",
+    providerLabel: "Provider",
+    apiKeyLabel: "API Key",
+    apiKeyPlaceholder: "Enter your API Key",
+    apiKeyHelp: "Leave empty to use default key (Gemini only)",
+    providerGemini: "Google Gemini 2.5 Flash",
+    providerOpenAI: "OpenAI DALL-E 3",
+    providerDoubao: "Volcano Engine (Doubao)",
+    providerQwen: "Alibaba Tongyi (Qwen)"
   },
   zh: {
     appTitle: "Icon格式转化器",
@@ -49,7 +59,7 @@ const translations = {
     aiDesc: "描述您需要的图标，AI 将为您创建专业的矢量风格素材，随时可以转换。",
     aiPlaceholder: "例如：一个极简风格的蓝色火箭图标...",
     aiButton: "开始生成",
-    aiPoweredBy: "由 Google Gemini 2.5 Flash Image 提供支持",
+    aiPoweredBy: "由 AI 模型驱动",
     convertTitle: "图片转图标格式",
     convertDesc: "轻松制作 Windows (.ICO) 和 macOS (.ICNS) 多尺寸图标。安全、本地转换。",
     formatWindows: "Windows",
@@ -71,7 +81,16 @@ const translations = {
     terms: "服务条款",
     errorImage: "请上传有效的图片文件 (PNG, JPG)。",
     errorGen: "生成图标失败。",
-    layerType: "32位 PNG"
+    layerType: "32位 PNG",
+    settingsTitle: "AI 设置",
+    providerLabel: "服务提供商",
+    apiKeyLabel: "API 密钥",
+    apiKeyPlaceholder: "输入您的 API 密钥",
+    apiKeyHelp: "留空则使用默认密钥（仅限 Gemini）",
+    providerGemini: "Google Gemini 2.5 Flash",
+    providerOpenAI: "OpenAI DALL-E 3",
+    providerDoubao: "字节跳动火山引擎 (Doubao)",
+    providerQwen: "阿里云通义万相 (Qwen)"
   }
 };
 
@@ -89,6 +108,8 @@ const App = () => {
   // Generation state
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [aiConfig, setAiConfig] = useState<AIConfig>({ provider: 'gemini', apiKey: '' });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -163,7 +184,7 @@ const App = () => {
     setError(null);
     
     try {
-      const result = await generateIcon(prompt);
+      const result = await generateIcon(prompt, aiConfig);
       resetState();
       setSourceImage(result.url);
       // Automatically switch to Convert tab to show results
@@ -258,27 +279,80 @@ const App = () => {
               <p className="text-zinc-400 text-lg">{t.aiDesc}</p>
             </div>
 
-            <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl shadow-xl backdrop-blur-sm">
-              <div className="flex gap-3 flex-col sm:flex-row">
-                <input
-                  type="text"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={t.aiPlaceholder}
-                  className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
-                  onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
-                />
-                <Button 
-                  onClick={handleGenerate} 
-                  isLoading={isGenerating} 
-                  disabled={!prompt.trim()}
-                  icon={<Zap size={18} />}
-                  className="px-6 w-full sm:w-auto"
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl shadow-xl backdrop-blur-sm relative overflow-hidden flex flex-col">
+              
+              {/* Toolbar Header for Settings */}
+              <div className="flex justify-end p-4 border-b border-zinc-800/50 bg-zinc-900/30">
+                <button 
+                  onClick={() => setShowSettings(!showSettings)}
+                  className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 text-xs font-medium border ${showSettings ? 'bg-zinc-800 text-white border-zinc-700' : 'text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-zinc-800/50'}`}
                 >
-                  {t.aiButton}
-                </Button>
+                  <Settings size={14} />
+                  <span>{t.settingsTitle}</span>
+                  {showSettings ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
               </div>
-              <p className="text-xs text-zinc-500 mt-3 text-left">{t.aiPoweredBy}</p>
+
+              <div className="p-6 pt-4">
+                {/* Settings Panel */}
+                {showSettings && (
+                  <div className="mb-6 p-4 bg-zinc-950/50 border border-zinc-800 rounded-xl text-left space-y-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                          <Sparkles size={12} /> {t.providerLabel}
+                        </label>
+                        <select 
+                          value={aiConfig.provider}
+                          onChange={(e) => setAiConfig(prev => ({ ...prev, provider: e.target.value as any }))}
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
+                        >
+                          <option value="gemini">{t.providerGemini}</option>
+                          <option value="openai">{t.providerOpenAI}</option>
+                          <option value="doubao">{t.providerDoubao}</option>
+                          <option value="qwen">{t.providerQwen}</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+                          <Key size={12} /> {t.apiKeyLabel}
+                        </label>
+                        <input
+                          type="password"
+                          value={aiConfig.apiKey}
+                          onChange={(e) => setAiConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                          placeholder={t.apiKeyPlaceholder}
+                          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+                    {aiConfig.provider === 'gemini' && (
+                      <p className="text-xs text-zinc-500 italic">{t.apiKeyHelp}</p>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex gap-3 flex-col sm:flex-row">
+                  <input
+                    type="text"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder={t.aiPlaceholder}
+                    className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+                    onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                  />
+                  <Button 
+                    onClick={handleGenerate} 
+                    isLoading={isGenerating} 
+                    disabled={!prompt.trim()}
+                    icon={<Zap size={18} />}
+                    className="px-6 w-full sm:w-auto"
+                  >
+                    {t.aiButton}
+                  </Button>
+                </div>
+                <p className="text-xs text-zinc-500 mt-3 text-left">{t.aiPoweredBy}</p>
+              </div>
             </div>
           </div>
         )}
