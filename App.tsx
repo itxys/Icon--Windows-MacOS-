@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Download, Image as ImageIcon, Sparkles, RefreshCcw, Zap, Layers, Monitor, Apple, Globe, Mail, User, Settings, Key, ChevronDown, ChevronUp, Cpu, Disc, FileCode } from 'lucide-react';
+import { Upload, Download, Image as ImageIcon, Sparkles, RefreshCcw, Zap, Layers, Monitor, Apple, Globe, Mail, User, Settings, Key, ChevronDown, ChevronUp, Cpu, Disc, FileCode, Github } from 'lucide-react';
 import { generateIconLayers, createIcoFile, createIcnsFile } from './utils/icoGenerator';
 import { generateIcon } from './services/geminiService';
 import { IconLayer, AppTab, IconFormat, AIConfig } from './types';
@@ -35,6 +35,7 @@ const translations = {
     footerCopyright: "LOCAL_PROCESSING_ONLY.",
     author: "DEV: houxiaohou",
     email: "CONTACT: itxysh@gmail.com",
+    github: "GITHUB: github.com/itxys",
     privacy: "PRIVACY",
     terms: "TERMS",
     errorImage: "ERR: INVALID_FILE_TYPE",
@@ -56,7 +57,7 @@ const translations = {
     navGenerate: "AI生成",
     aiTitle: "AI_智能绘图",
     aiDesc: "启动生成序列。描述目标矢量素材，系统将渲染专业级图像。",
-    aiPlaceholder: "指令输入 > 例如：极简风格的赛博火箭...",
+    aiPlaceholder: "指令输入 > 例如：极简风格的蓝色火箭...",
     aiButton: "执行生成",
     aiPoweredBy: "系统：AI 神经网络驱动",
     convertTitle: "图片转图标模块",
@@ -76,6 +77,7 @@ const translations = {
     footerCopyright: "全本地离线处理。",
     author: "开发: houxiaohou",
     email: "联系: itxysh@gmail.com",
+    github: "GITHUB: github.com/itxys",
     privacy: "隐私协议",
     terms: "服务条款",
     errorImage: "错误：无效的文件类型",
@@ -347,7 +349,7 @@ const App = () => {
                       </div>
                     </div>
                     {aiConfig.provider === 'gemini' && (
-                      <p className="text-[10px] text-zinc-600 mt-2 italic font-mono">> {t.apiKeyHelp}</p>
+                      <p className="text-[10px] text-zinc-600 mt-2 italic font-mono">&gt; {t.apiKeyHelp}</p>
                     )}
                   </div>
                 )}
@@ -447,7 +449,7 @@ const App = () => {
                       <Upload size={32} />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-lg font-bold text-zinc-200 group-hover:text-orange-400 transition-colors uppercase tracking-wider">>> {t.uploadClick}</p>
+                      <p className="text-lg font-bold text-zinc-200 group-hover:text-orange-400 transition-colors uppercase tracking-wider">&gt;&gt; {t.uploadClick}</p>
                       <p className="text-xs text-zinc-500 font-mono">{t.uploadDesc}</p>
                     </div>
                   </div>
@@ -572,6 +574,10 @@ const App = () => {
                   <Mail size={12} />
                   <span>{t.email}</span>
                 </div>
+                <a href="https://github.com/itxys" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-orange-500 transition-colors">
+                  <Github size={12} />
+                  <span>{t.github}</span>
+                </a>
              </div>
            </div>
            

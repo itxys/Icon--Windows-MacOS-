@@ -36,6 +36,7 @@
     *   Google GenAI SDK (`@google/genai`)
     *   Fetch API (用于 OpenAI, Volcano Engine, Alibaba Cloud)
 *   **图像处理**: HTML5 Canvas API & Blob 操作
+*   **桌面封装**: Electron
 
 ### 🚀 使用指南
 
@@ -51,10 +52,35 @@
     *   在输入框中描述您想要的图标（例如：“一个极简风格的蓝色火箭图标”），点击生成。
     *   生成成功后，应用会自动跳转到转换页面供您下载。
 
+### 📦 打包桌面应用 (Electron)
+
+本项目包含 Electron 配置，可以打包成独立的桌面应用程序 (.exe, .dmg, .AppImage)。
+
+1.  **安装依赖**:
+    ```bash
+    npm install
+    ```
+
+2.  **开发模式运行 (Electron)**:
+    ```bash
+    # 确保同时开启两个终端
+    # 终端 1: 启动 Vite 开发服务器
+    npm run dev
+    # 终端 2: 启动 Electron
+    npm run electron:dev
+    ```
+
+3.  **构建安装包**:
+    ```bash
+    npm run electron:build
+    ```
+    构建完成后，安装包将位于 `dist-electron` 目录中。
+
 ### 👤 作者信息
 
 *   **作者**: houxiaohou
 *   **邮箱**: itxysh@gmail.com
+*   **GitHub**: [https://github.com/itxys](https://github.com/itxys)
 
 ---
 
@@ -90,6 +116,7 @@ Beyond local conversion, it integrates with multiple leading **AI Image Models**
     *   Google GenAI SDK (`@google/genai`)
     *   Fetch API (for OpenAI, Volcano Engine, Alibaba Cloud)
 *   **Image Processing**: HTML5 Canvas API & Blob manipulation
+*   **Desktop Wrapper**: Electron
 
 ### 📖 Usage
 
@@ -105,7 +132,32 @@ Beyond local conversion, it integrates with multiple leading **AI Image Models**
     *   Type a description (e.g., "A futuristic blue rocket ship, minimalist flat design") and click Generate.
     *   Once generated, the app automatically switches to the conversion view for download.
 
+### 📦 Build Desktop App (Electron)
+
+This project is configured with Electron to build standalone desktop applications (.exe, .dmg, .AppImage).
+
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+
+2.  **Run in Development (Electron)**:
+    ```bash
+    # Open two terminals
+    # Terminal 1: Start Vite Dev Server
+    npm run dev
+    # Terminal 2: Start Electron
+    npm run electron:dev
+    ```
+
+3.  **Build Installer**:
+    ```bash
+    npm run electron:build
+    ```
+    The installer files will be generated in the `dist-electron` directory.
+
 ### 👤 Author
 
 *   **Author**: houxiaohou
 *   **Email**: itxysh@gmail.com
+*   **GitHub**: [https://github.com/itxys](https://github.com/itxys)
