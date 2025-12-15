@@ -17,10 +17,3 @@ export interface GeneratedImage {
 }
 
 export type IconFormat = 'ICO' | 'ICNS';
-
-export type AIProvider = 'gemini' | 'openai' | 'doubao' | 'qwen';
-
-export interface AIConfig {
-  provider: AIProvider;
-  apiKey: string;
-}

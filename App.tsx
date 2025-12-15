@@ -1,8 +1,9 @@
+
 import React, { useState, useRef } from 'react';
-import { Upload, Download, Image as ImageIcon, Sparkles, RefreshCcw, Zap, Layers, Monitor, Apple, Globe, Mail, User, Settings, Key, ChevronDown, ChevronUp, Cpu, Disc, FileCode, Github } from 'lucide-react';
+import { Upload, Download, Image as ImageIcon, Sparkles, RefreshCcw, Zap, Layers, Monitor, Apple, Disc, FileCode, Github, Mail, User } from 'lucide-react';
 import { generateIconLayers, createIcoFile, createIcnsFile } from './utils/icoGenerator';
 import { generateIcon } from './services/geminiService';
-import { IconLayer, AppTab, IconFormat, AIConfig } from './types';
+import { IconLayer, AppTab, IconFormat } from './types';
 import { Button } from './components/Button';
 import { Alert } from './components/Alert';
 
@@ -17,7 +18,7 @@ const translations = {
     aiDesc: "Initialize generation sequence. Describe target vector asset. System will render professional-grade imagery.",
     aiPlaceholder: "INPUT_PROMPT > e.g. Minimalist cyber-rocket...",
     aiButton: "EXECUTE_GEN",
-    aiPoweredBy: "SYSTEM: POWERED BY AI NEURAL NET",
+    aiPoweredBy: "SYSTEM: POWERED BY GOOGLE GEMINI 2.5",
     convertTitle: "IMG_TO_ICON_MODULE",
     convertDesc: "Convert raster graphics to multi-size Windows (.ICO) and macOS (.ICNS) format. Client-side processing only.",
     formatWindows: "WINDOWS",
@@ -41,15 +42,6 @@ const translations = {
     errorImage: "ERR: INVALID_FILE_TYPE",
     errorGen: "ERR: GENERATION_FAILED",
     layerType: "32-BIT",
-    settingsTitle: "CONFIG",
-    providerLabel: "PROVIDER_SELECT",
-    apiKeyLabel: "ACCESS_KEY",
-    apiKeyPlaceholder: "INPUT_KEY...",
-    apiKeyHelp: "DEFAULT_KEY_ACTIVE (GEMINI)",
-    providerGemini: "GOOGLE_GEMINI_2.5",
-    providerOpenAI: "OPENAI_DALLE_3",
-    providerDoubao: "VOLCANO_DOUBAO",
-    providerQwen: "ALIBABA_QWEN"
   },
   zh: {
     appTitle: "图标格式转换器",
@@ -59,7 +51,7 @@ const translations = {
     aiDesc: "启动生成序列。描述目标矢量素材，系统将渲染专业级图像。",
     aiPlaceholder: "指令输入 > 例如：极简风格的蓝色火箭...",
     aiButton: "执行生成",
-    aiPoweredBy: "系统：AI 神经网络驱动",
+    aiPoweredBy: "系统：Google Gemini 2.5 驱动",
     convertTitle: "图片转图标模块",
     convertDesc: "将光栅图形转换为多尺寸 Windows (.ICO) 和 macOS (.ICNS) 格式。仅客户端处理。",
     formatWindows: "WINDOWS",
@@ -83,15 +75,6 @@ const translations = {
     errorImage: "错误：无效的文件类型",
     errorGen: "错误：生成失败",
     layerType: "32位",
-    settingsTitle: "系统配置",
-    providerLabel: "服务提供商",
-    apiKeyLabel: "访问密钥",
-    apiKeyPlaceholder: "输入密钥...",
-    apiKeyHelp: "默认密钥激活中 (仅限 Gemini)",
-    providerGemini: "GOOGLE_GEMINI_2.5",
-    providerOpenAI: "OPENAI_DALLE_3",
-    providerDoubao: "字节跳动_DOUBAO",
-    providerQwen: "阿里云_QWEN"
   }
 };
 
@@ -109,8 +92,6 @@ const App = () => {
   // Generation state
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [aiConfig, setAiConfig] = useState<AIConfig>({ provider: 'gemini', apiKey: '' });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -185,13 +166,15 @@ const App = () => {
     setError(null);
     
     try {
-      const result = await generateIcon(prompt, aiConfig);
+      const result = await generateIcon(prompt);
       resetState();
+      
+      // Update state and process
       setSourceImage(result.url);
-      // Automatically switch to Convert tab to show results
       setActiveTab(AppTab.CONVERT);
-      // Wait a tick for UI update then process
-      setTimeout(() => processImage(result.url, format), 100);
+      
+      // Process immediately with the new URL
+      await processImage(result.url, format);
     } catch (err: any) {
       setError(err.message || t.errorGen);
     } finally {
@@ -228,7 +211,7 @@ const App = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-lg tracking-widest text-zinc-100 uppercase leading-none">{t.appTitle}</span>
-              <span className="text-[10px] tracking-[0.2em] text-orange-500 font-bold mt-1">V1.0.4 // STABLE</span>
+              <span className="text-[10px] tracking-[0.2em] text-orange-500 font-bold mt-1">V1.0.5 // STABLE</span>
             </div>
           </div>
           
@@ -296,64 +279,15 @@ const App = () => {
               <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-orange-500"></div>
               <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-orange-500"></div>
               
-              {/* Toolbar Header for Settings */}
+              {/* Toolbar Header */}
               <div className="flex items-center justify-between p-2 border-b border-zinc-800 bg-zinc-950/80">
                 <div className="flex items-center gap-2 px-2">
                    <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
                    <span className="text-[10px] uppercase tracking-widest text-zinc-500">MODULE_STATUS: ONLINE</span>
                 </div>
-                <button 
-                  onClick={() => setShowSettings(!showSettings)}
-                  className={`px-3 py-1 transition-colors flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider border ${showSettings ? 'bg-zinc-800 text-orange-400 border-zinc-700' : 'text-zinc-500 border-transparent hover:text-zinc-300 hover:bg-zinc-800'}`}
-                >
-                  <Settings size={12} />
-                  <span>{t.settingsTitle}</span>
-                  {showSettings ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                </button>
               </div>
 
               <div className="p-6 space-y-6">
-                {/* Settings Panel */}
-                {showSettings && (
-                  <div className="p-4 bg-zinc-950 border border-zinc-800 animate-in fade-in slide-in-from-top-2 relative">
-                    <div className="absolute -top-3 left-3 bg-zinc-950 px-2 text-[10px] text-orange-500 font-bold uppercase tracking-wider border border-zinc-800">
-                       // SYSTEM_CONFIG
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-2">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-                          <Cpu size={12} /> {t.providerLabel}
-                        </label>
-                        <select 
-                          value={aiConfig.provider}
-                          onChange={(e) => setAiConfig(prev => ({ ...prev, provider: e.target.value as any }))}
-                          className="w-full bg-zinc-900 border border-zinc-700 px-3 py-2 text-xs text-zinc-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 uppercase font-mono rounded-none"
-                        >
-                          <option value="gemini">{t.providerGemini}</option>
-                          <option value="openai">{t.providerOpenAI}</option>
-                          <option value="doubao">{t.providerDoubao}</option>
-                          <option value="qwen">{t.providerQwen}</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-                          <Key size={12} /> {t.apiKeyLabel}
-                        </label>
-                        <input
-                          type="password"
-                          value={aiConfig.apiKey}
-                          onChange={(e) => setAiConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                          placeholder={t.apiKeyPlaceholder}
-                          className="w-full bg-zinc-900 border border-zinc-700 px-3 py-2 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 font-mono rounded-none"
-                        />
-                      </div>
-                    </div>
-                    {aiConfig.provider === 'gemini' && (
-                      <p className="text-[10px] text-zinc-600 mt-2 italic font-mono">&gt; {t.apiKeyHelp}</p>
-                    )}
-                  </div>
-                )}
-
                 <div className="flex flex-col gap-2">
                    <div className="flex gap-0 border border-zinc-700 p-1 bg-zinc-950">
                       <input
@@ -531,6 +465,25 @@ const App = () => {
                       {layers.map((layer) => (
                         <div key={layer.size} className="bg-zinc-950 border border-zinc-800 p-3 flex flex-col items-center gap-3 transition-all hover:border-orange-500/50 group relative">
                           <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-zinc-800 rounded-full group-hover:bg-orange-500"></div>
+                          
+                          {/* New: Download Overlay */}
+                          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
+                            <button
+                              onClick={(e) => {
+                                 e.stopPropagation();
+                                 const link = document.createElement('a');
+                                 link.href = layer.url;
+                                 link.download = `icon_${layer.size}x${layer.size}.png`;
+                                 document.body.appendChild(link);
+                                 link.click();
+                                 document.body.removeChild(link);
+                              }}
+                              className="p-2 bg-orange-600 text-black hover:bg-orange-500 rounded-sm transition-colors"
+                              title="Download PNG"
+                            >
+                              <Download size={16} />
+                            </button>
+                          </div>
                           
                           <div className="w-full aspect-square bg-zinc-900/50 border border-zinc-900 flex items-center justify-center p-2 relative overflow-hidden">
                              {/* Grid Lines */}

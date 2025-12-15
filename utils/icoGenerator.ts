@@ -1,7 +1,8 @@
 
 import { IconLayer, IconFormat } from '../types';
 
-const ICO_SIZES = [256, 128, 64, 48, 32, 16];
+// Comprehensive Windows sizes including standard and high-DPI variants
+const ICO_SIZES = [256, 96, 80, 72, 64, 60, 48, 40, 36, 32, 30, 24, 20, 16];
 const ICNS_SIZES = [1024, 512, 256, 128, 64, 32, 16];
 
 const ICNS_TYPES: Record<number, string[]> = {
