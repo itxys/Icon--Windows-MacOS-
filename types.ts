@@ -5,15 +5,4 @@ export interface IconLayer {
   url: string;
 }
 
-export enum AppTab {
-  CONVERT = 'CONVERT',
-  GENERATE = 'GENERATE'
-}
-
-export interface GeneratedImage {
-  url: string;
-  base64: string;
-  mimeType: string;
-}
-
 export type IconFormat = 'ICO' | 'ICNS';
